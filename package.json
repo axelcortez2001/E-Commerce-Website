@@ -1,14 +1,25 @@
 {
-  "name": "e-commerce-website",
+  "name": "marian_sop",
   "version": "1.0.0",
-  "description": "",
+  "description": "Marian Shopping",
   "main": "index.js",
   "scripts": {
+    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "start": "node backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Axel Cortez",
   "license": "ISC",
   "dependencies": {
     "multer": "^1.4.5-lts.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axelcortez2001/E-Commerce-Website.git"
+  },
+  "bugs": {
+    "url": "https://github.com/axelcortez2001/E-Commerce-Website/issues"
+  },
+  "homepage": "https://github.com/axelcortez2001/E-Commerce-Website#readme"
 }
