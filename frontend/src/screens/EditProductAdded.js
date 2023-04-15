@@ -9,7 +9,6 @@ import Container from "react-bootstrap/Container";
 import { Helmet } from "react-helmet-async";
 import Button from "react-bootstrap/Button";
 import { toast } from "react-toastify";
-import Image from "react-bootstrap/Image";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -57,6 +56,7 @@ export default function EditProductAdded() {
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
+  const [images, setImages] = useState([]);
   const [category, setCategory] = useState("");
   const [countInStock, setCountInStock] = useState("");
   const [brand, setBrand] = useState("");
@@ -123,6 +123,7 @@ export default function EditProductAdded() {
   const uploadprodimg = async (e) => {
     const file = e.target.files[0];
     const bodyFormData = new FormData();
+    bodyFormData.append("file", file);
     try {
       dispatch({ type: "UPLOAD_REQUEST" });
       const { data } = await axios.post("/api/upload", bodyFormData, {
