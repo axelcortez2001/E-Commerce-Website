@@ -24,10 +24,23 @@ export default function SignupSreen() {
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { userInfo } = state;
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+  };
+  const isPasswordValid = (password) => {
+    const passwordRegex =
+      /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    return passwordRegex.test(password);
+  };
   const signupHandler = async (e) => {
     e.preventDefault();
     if (password !== confirmPass) {
       toast.error("Password does not match!");
+      return;
+    }
+    if (!isPasswordValid(password)) {
+      toast.error("Password must contain symbol, number and capital letter!");
       return;
     }
     try {
@@ -130,10 +143,18 @@ export default function SignupSreen() {
           <input
             id='password'
             type='password'
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             required
             className='border rounded py-2 px-3 w-full'
           />
+          {password && isPasswordValid(password) && (
+            <span className='text-sm text-green-500'>Password Valid!</span>
+          )}
+          {password && !isPasswordValid(password) && (
+            <span className='text-sm text-red-500'>
+              Password must have at least 8 characters and contain a symbol.
+            </span>
+          )}
         </Form.Group>
 
         <Form.Group className='mb-6' controlId='comfirmPass'>

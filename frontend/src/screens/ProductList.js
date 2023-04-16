@@ -30,17 +30,40 @@ const reducer = (state, action) => {
       };
     case "CREATE_FAIL":
       return { ...state, loadingCreate: false };
+    case "DELETE_REQUEST":
+      return { ...state, loadingDelete: true, successDelete: false };
+    case "DELETE_SUCCESS":
+      return {
+        ...state,
+        loadingDelete: false,
+        successDelete: true,
+      };
+    case "DELETE_FAIL":
+      return { ...state, loadingDelete: false, successDelete: false };
+
+    case "DELETE_RESET":
+      return { ...state, loadingDelete: false, successDelete: false };
     default:
       return state;
   }
 };
 
 export default function ProductList() {
-  const [{ loading, error, products, pages, loadingCreate }, dispatch] =
-    useReducer(reducer, {
-      loading: true,
-      error: "",
-    });
+  const [
+    {
+      loading,
+      error,
+      products,
+      pages,
+      loadingCreate,
+      loadingDelete,
+      successDelete,
+    },
+    dispatch,
+  ] = useReducer(reducer, {
+    loading: true,
+    error: "",
+  });
 
   const { search } = useLocation();
   const navigate = useNavigate();
@@ -58,11 +81,15 @@ export default function ProductList() {
         dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {}
     };
-    fetchData();
-  }, [page, userInfo]);
+    if (successDelete) {
+      dispatch({ type: "DELETE_RESET" });
+    } else {
+      fetchData();
+    }
+  }, [page, userInfo, successDelete]);
 
   const addProd = async () => {
-    if (window.confirm("Are you sure to create?")) {
+    if (window.confirm("This will create a new product for edit!")) {
       try {
         dispatch({ type: "CREATE_SUCCESS" });
         const { data } = await axios.post(
@@ -83,10 +110,26 @@ export default function ProductList() {
       }
     }
   };
+  const deleteProd = async (product) => {
+    if (window.confirm("Product will be deleted?")) {
+      try {
+        await axios.delete(`/api/products/${product._id}`, {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+        toast.success("product deleted successfully");
+        dispatch({ type: "DELETE_SUCCESS" });
+      } catch (err) {
+        toast.error(getError(err));
+        dispatch({
+          type: "DELETE_FAIL",
+        });
+      }
+    }
+  };
   return (
     <div class='mx-auto'>
-      <div class='flex justify-between items-center mb-8'>
-        <h1 class='text-3xl font-bold'>Products</h1>
+      <div class='flex flex-col sm:flex-row justify-between items-center mb-8'>
+        <h1 class='text-3xl font-bold mb-4 sm:mb-0'>Products</h1>
 
         <button
           onClick={addProd}
@@ -101,33 +144,43 @@ export default function ProductList() {
         ) : error ? (
           <div className='text-center'>{error}</div>
         ) : (
-          <table class='w-full table-fixed'>
+          <table class='w-full table-fixed text-sm sm:text-base'>
             <thead class='bg-gray-200'>
               <tr class='text-left'>
-                <th class='w-2/6 px-4 py-2'>ID</th>
-                <th class='w-2/6 px-4 py-2'>NAME</th>
-                <th class='w-1/6 px-4 py-2'>PRICE</th>
-                <th class='w-1/6 px-4 py-2'>QUANTITY</th>
-                <th class='w-1/6 px-4 py-2'>BRAND</th>
-                <th class='w-1/6 px-4 py-2'>CATEGORY</th>
-                <th class='w-1/6 px-4 py-2'>ACTIONS</th>
+                <th class='w-2/6 px-2 py-2'>ID</th>
+                <th class='w-2/6 px-2 py-2'>NAME</th>
+                <th class='w-1/6 px-2 py-2'>PRICE</th>
+                <th class='w-1/6 px-2 py-2'>QUANTITY</th>
+                <th class='w-1/6 px-2 py-2'>BRAND</th>
+                <th class='w-1/6 px-2 py-2'>CATEGORY</th>
+                <th class='w-1/6 px-2 py-2'>ACTIONS</th>
               </tr>
             </thead>
-            <tbody class='bg-white'>
+            <tbody class='bg-white divide-y divide-gray-200'>
               {products.map((product) => (
                 <tr key={product._id} class='border-b border-gray-300'>
-                  <td class='px-4 py-2'>{product._id}</td>
-                  <td class='px-4 py-2'>{product.name}</td>
-                  <td class='px-4 py-2'>{product.price}</td>
-                  <td class='px-4 py-2'>{product.countInStock}</td>
-                  <td class='px-4 py-2'>{product.brand}</td>
-                  <td class='px-4 py-2'>{product.category}</td>
-                  <button
-                    type='button'
-                    onClick={() => navigate(`/admin/products/${product._id}`)}
-                  >
-                    Edit
-                  </button>
+                  <td class='px-2 py-2'>{product._id}</td>
+                  <td class='px-2 py-2'>{product.name}</td>
+                  <td class='px-2 py-2'>{product.price}</td>
+                  <td class='px-2 py-2'>{product.countInStock}</td>
+                  <td class='px-2 py-2'>{product.brand}</td>
+                  <td class='px-2 py-2'>{product.category}</td>
+                  <td class='px-2 py-2 flex justify-center'>
+                    <button
+                      class='text-blue-500 hover:text-blue-700 mr-2'
+                      type='button'
+                      onClick={() => navigate(`/admin/products/${product._id}`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class='text-red-500 hover:text-red-700'
+                      type='button'
+                      onClick={() => deleteProd(product)}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
