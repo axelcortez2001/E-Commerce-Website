@@ -152,7 +152,8 @@ export default function SignupSreen() {
           )}
           {password && !isPasswordValid(password) && (
             <span className='text-sm text-red-500'>
-              Password must have at least 8 characters and contain a symbol.
+              Password must have at least 8 characters and contain a symbol,
+              number and Capital.
             </span>
           )}
         </Form.Group>
