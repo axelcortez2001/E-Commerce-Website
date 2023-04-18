@@ -5,6 +5,16 @@ import Order from "../models/orderModels.js";
 import User from "../models/userModel.js";
 const orderRouter = express.Router();
 
+orderRouter.get(
+  "/",
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const orders = await Order.find().populate("user", "name");
+    res.send(orders);
+  })
+);
+
 orderRouter.post(
   "/",
   isAuth,
@@ -70,6 +80,22 @@ orderRouter.get(
       res.send(order);
     } else {
       res.status(404).send({ message: "Order Not Found" });
+    }
+  })
+);
+
+orderRouter.put(
+  "/:id/done",
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    if (order) {
+      order.isDelivered = true;
+      order.deliveredAt = Date.now();
+      await order.save();
+      res.send({ message: "Order Done" });
+    } else {
+      res.status(404).send({ message: "Order not found!" });
     }
   })
 );

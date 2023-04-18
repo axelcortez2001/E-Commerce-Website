@@ -9,6 +9,8 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -18,7 +20,18 @@ function reducer(state, action) {
       return { ...state, loading: false, order: action.payload, error: "" };
     case "FETCH_FAIL":
       return { ...state, loading: false, error: action.payload };
-
+    case "DELIVER_REQUEST":
+      return { ...state, loadingDeliver: true };
+    case "DELIVER_SUCCESS":
+      return { ...state, loadingDeliver: false, successDeliver: true };
+    case "DELIVER_FAIL":
+      return { ...state, loadingDeliver: false };
+    case "DELIVER_RESET":
+      return {
+        ...state,
+        loadingDeliver: false,
+        successDeliver: false,
+      };
     default:
       return state;
   }
@@ -31,11 +44,12 @@ export default function OrderScreen() {
   const { id: orderId } = params;
   const navigate = useNavigate();
 
-  const [{ loading, error, order }, dispatch] = useReducer(reducer, {
-    loading: true,
-    order: {},
-    error: "",
-  });
+  const [{ loading, error, order, loadingDeliver, successDeliver }, dispatch] =
+    useReducer(reducer, {
+      loading: true,
+      order: {},
+      error: "",
+    });
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -53,11 +67,32 @@ export default function OrderScreen() {
     if (!userInfo) {
       return navigate("/login");
     }
-    if (!order._id || (order._id && order._id !== orderId)) {
+    if (!order._id || successDeliver || (order._id && order._id !== orderId)) {
       fetchOrder();
+      if (successDeliver) {
+        dispatch({ type: "DELIVER_RESET" });
+      }
     }
-  }, [order, userInfo, orderId, navigate]);
-  console.log(order);
+  }, [order, userInfo, orderId, navigate, successDeliver]);
+
+  async function procesdeliver() {
+    try {
+      dispatch({ type: "DELIVER_REQUEST" });
+      const { data } = await axios.put(
+        `/api/orders/${order._id}/done`,
+        {},
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      dispatch({ type: "DELIVER_SUCCESS", payload: data });
+      toast.success("Order is delivered");
+    } catch (err) {
+      toast.error(getError(err));
+      dispatch({ type: "DELIVER_FAIL" });
+    }
+  }
+
   return loading ? (
     <LoadingBox></LoadingBox>
   ) : error ? (
@@ -67,7 +102,9 @@ export default function OrderScreen() {
       <Helmet>
         <title>Order {orderId}</title>
       </Helmet>
-      <h1 className='my-3'>Order {orderId}</h1>
+      <h1 className='my-3 text-center text-slate-950 text-3xl'>
+        Order {orderId}
+      </h1>
       <Row>
         <Col md={8}>
           <Card className='mb-3'>
@@ -93,7 +130,7 @@ export default function OrderScreen() {
               </Card.Text>
               {order.isDelivered ? (
                 <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded'>
-                  Received at {order.deliverdAt}
+                  Received at {order.deliveredAt}
                 </span>
               ) : (
                 <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
@@ -152,6 +189,18 @@ export default function OrderScreen() {
                     {order.totalPrice.toFixed(2)}
                   </span>
                 </ListGroup.Item>
+                {userInfo.isAdmin && !order.isDelivered && (
+                  <ListGroup.Item className='flex items-center justify-center'>
+                    {loadingDeliver && <LoadingBox />}
+                    <button
+                      type='button'
+                      onClick={procesdeliver}
+                      className='bg-green-500 hover:bg-green-600 w-full text-white font-semibold px-4 py-2 rounded-lg transition duration-300'
+                    >
+                      Mark Done
+                    </button>
+                  </ListGroup.Item>
+                )}
                 <ListGroup.Item>
                   <div className='grid'></div>
                   {loading && <LoadingBox></LoadingBox>}
