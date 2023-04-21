@@ -75,31 +75,36 @@ productRouter.delete(
 );
 
 productRouter.post(
-  '/:id/reviews',
+  "/:id/reviews",
   isAuth,
   expressAsyncHandler(async (req, res) => {
     const productId = req.params.id;
     const product = await Product.findById(productId);
-    if(product){
-      if(product.reviews.find((x) => x.name === req.user.name)){
-        return res.status(400).send({message: 'You already submitted a review'});
+    if (product) {
+      if (product.reviews.find((x) => x.name === req.user.name)) {
+        return res
+          .status(400)
+          .send({ message: "You already submitted a review" });
       }
       const review = {
         name: req.user.name,
-        rating : Number(req.body.rating),
+        rating: Number(req.body.rating),
         comment: req.body.comment,
       };
       product.reviews.push(review);
       product.numReview = product.reviews.length;
+      product.rating =
+        product.reviews.reduce((a, c) => c.rating + a, 0) /
+        product.reviews.length;
       const updateProduct = await product.save();
       res.status(201).send({
-        message: 'Product has been reviewed!',
+        message: "Product has been reviewed!",
         review: updateProduct.reviews[updateProduct.reviews.length - 1],
         numReview: product.numReview,
         rating: product.rating,
       });
-    }else{
-      res.status(404).send({message: 'Product not found!'});
+    } else {
+      res.status(404).send({ message: "Product not found!" });
     }
   })
 );

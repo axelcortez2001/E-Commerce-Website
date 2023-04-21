@@ -1,10 +1,71 @@
 import express from "express";
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
-import { generateToken, isAuth } from "../utils.js";
+import { generateToken, isAuth, isAdmin } from "../utils.js";
 import expressAsyncHandler from "express-async-handler";
 
 const userRouter = express.Router();
+
+userRouter.get(
+  "/",
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const users = await User.find({});
+    res.send(users);
+  })
+);
+
+userRouter.get(
+  "/:id",
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      res.send(user);
+    } else {
+      res.status(404).send({ message: "User Not Found!" });
+    }
+  })
+);
+userRouter.put(
+  "/:id",
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.address = req.body.address || user.address;
+      user.course = req.body.course || user.course;
+      const userupdate = await user.save();
+      res.send({ message: "User Updated", user: userupdate });
+    } else {
+      res.status(404).send({ message: "User not found!" });
+    }
+  })
+);
+
+userRouter.delete(
+  "/:id",
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      if (user.isAdmin) {
+        res.status(400).send({ message: "Cannot delete admin user" });
+        return;
+      }
+      await user.deleteOne();
+      res.send({ message: "User deleted!" });
+    } else {
+      res.status(400).send({ message: "User not found!" });
+    }
+  })
+);
 
 userRouter.post(
   "/signin",

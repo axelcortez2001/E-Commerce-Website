@@ -21,6 +21,8 @@ import AdminRoute from "./components/AdminRoute";
 import ProductList from "./screens/ProductList";
 import EditProductAdded from "./screens/EditProductAdded";
 import OrdersList from "./screens/OrdersList";
+import UserList from "./screens/UserList";
+import UserEdit from "./screens/UserEdit";
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -161,6 +163,14 @@ function App() {
               }
             />
             <Route
+              path='/admin/users'
+              element={
+                <AdminRoute>
+                  <UserList />
+                </AdminRoute>
+              }
+            />
+            <Route
               path='/admin/products'
               element={
                 <AdminRoute>
@@ -173,6 +183,14 @@ function App() {
               element={
                 <AdminRoute>
                   <EditProductAdded />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path='/admin/user/:id'
+              element={
+                <AdminRoute>
+                  <UserEdit />
                 </AdminRoute>
               }
             />

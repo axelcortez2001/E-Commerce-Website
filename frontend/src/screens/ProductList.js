@@ -139,6 +139,7 @@ export default function ProductList() {
         </button>
       </div>
       <div class='overflow-x-auto'>
+        {loadingDelete && loadingCreate && <LoadingBox></LoadingBox>}
         {loading ? (
           <LoadingBox />
         ) : error ? (
