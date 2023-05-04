@@ -94,7 +94,7 @@ productRouter.post(
       product.reviews.push(review);
       product.numReview = product.reviews.length;
       product.rating =
-        product.reviews.reduce((a, c) => c.rating + a, 0) /
+        product.reviews.reduce((a, c) => parseFloat(c.rating) + a, 0) /
         product.reviews.length;
       const updateProduct = await product.save();
       res.status(201).send({

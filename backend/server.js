@@ -7,7 +7,6 @@ import orderRouter from "./routes/orderRoutes.js";
 import uploadRouter from "./routes/uploadRoutes.js";
 import path from "path";
 
-
 dotenv.config();
 
 mongoose
