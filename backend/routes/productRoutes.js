@@ -35,6 +35,21 @@ productRouter.post(
 );
 
 productRouter.put(
+  "/:id/update-stock",
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (product) {
+      product.countInStock = req.body.countInStock;
+      await product.save();
+      res.send({ message: "Product stock updated" });
+    } else {
+      res.status(404).send({ message: "Product Not Found" });
+    }
+  })
+);
+productRouter.put(
   "/:id",
   isAuth,
   isAdmin,

@@ -77,7 +77,13 @@ export default function CartScreen() {
                         <span className='text-gray-700'>{item.quantity}</span>
                         <button
                           className='bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded-full ml-2'
-                          onClick={() => updateCart(item, item.quantity + 1)}
+                          onClick={() => {
+                            if (item.quantity === 10) {
+                              window.alert("You can only add up to 10 items");
+                              return;
+                            }
+                            updateCart(item, item.quantity + 1);
+                          }}
                           disabled={item.quantity === item.countInStock}
                         >
                           <i className='fas fa-plus-circle'></i>

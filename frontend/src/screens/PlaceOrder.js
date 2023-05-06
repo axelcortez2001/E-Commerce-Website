@@ -1,11 +1,11 @@
-import React, { useContext, useReducer } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import OrderSteps from "../components/OrderSteps";
 import { Helmet } from "react-helmet-async";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { getError } from "../utils";
@@ -27,7 +27,6 @@ const reducer = (state, action) => {
 
 export default function PlaceOrder() {
   const navigate = useNavigate();
-
   const [{ loading }, dispatch] = useReducer(reducer, {
     loading: false,
   });
@@ -39,9 +38,26 @@ export default function PlaceOrder() {
   cart.totalPrice = round(
     cart.cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
   );
+
   const placeOrderHandler = async () => {
     try {
       dispatch({ type: "CREATE_REQUEST" });
+      for (const item of cart.cartItems) {
+        const { data } = await Axios.put(
+          `/api/products/${item._id}/update-stock`,
+          {
+            countInStock: item.countInStock - item.quantity,
+          },
+          {
+            headers: {
+              authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+        );
+        console.log(data);
+      }
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 2);
 
       const { data } = await Axios.post(
         "/api/orders",
@@ -49,6 +65,7 @@ export default function PlaceOrder() {
           orderItems: cart.cartItems,
           customerDetails: cart.customerDetails,
           totalPrice: cart.totalPrice,
+          expiryDate: expiryDate,
         },
         {
           headers: {
@@ -56,6 +73,8 @@ export default function PlaceOrder() {
           },
         }
       );
+      console.log(data.data);
+
       ctxDispatch({ type: "CART_CLEAR" });
       dispatch({ type: "CREATE_SUCCESS" });
       localStorage.removeItem("cartItems");

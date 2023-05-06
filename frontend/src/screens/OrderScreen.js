@@ -75,6 +75,18 @@ export default function OrderScreen() {
     }
   }, [order, userInfo, orderId, navigate, successDeliver]);
 
+  useEffect(() => {
+    const checkExpiry = () => {
+      const now = new Date().getTime();
+      const expiry = new Date(order.expiryDate).getTime();
+      if (now > expiry) {
+        processFailOrder();
+      }
+    };
+    const expiryInterval = setInterval(checkExpiry, 1000);
+    return () => clearInterval(expiryInterval);
+  }, [order]);
+
   async function procesdeliver() {
     try {
       dispatch({ type: "DELIVER_REQUEST" });
@@ -92,9 +104,24 @@ export default function OrderScreen() {
       dispatch({ type: "DELIVER_FAIL" });
     }
   }
+  async function processFailOrder() {
+    try {
+      const { data } = await Axios.put(
+        `/api/orders/${orderId}/fail`,
+        {},
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      dispatch({ type: "FETCH_SUCCESS", payload: data });
+      toast.success("Order is marked as failed");
+    } catch (err) {
+      toast.error(getError(err));
+    }
+  }
 
   return loading ? (
-    <LoadingBox></LoadingBox>
+    <LoadingBox />
   ) : error ? (
     <div className='text-center'>{error}</div>
   ) : (
@@ -123,14 +150,32 @@ export default function OrderScreen() {
                   <strong className='mr-2'>Course:</strong>
                   <span>{order.customerDetails.course}</span>
                 </div>
-                <div className='flex items-center'>
+                <div className='flex items-center mb-2'>
                   <strong className='mr-2'>Address:</strong>
                   <span>{order.customerDetails.address}</span>
+                </div>
+                <div className='flex items-center mb-2'>
+                  <strong className='mr-2'>Expiry Date:</strong>
+                  <span>
+                    {new Date(order.expiryDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
                 </div>
               </Card.Text>
               {order.isDelivered ? (
                 <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded'>
                   Received at {order.deliveredAt}
+                </span>
+              ) : order.isFailed ? (
+                <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
+                  Failed
+                </span>
+              ) : order.expiryDate >= Date.now ? (
+                <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
+                  Expired
                 </span>
               ) : (
                 <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
@@ -189,7 +234,7 @@ export default function OrderScreen() {
                     {order.totalPrice.toFixed(2)}
                   </span>
                 </ListGroup.Item>
-                {userInfo.isAdmin && !order.isDelivered && (
+                {userInfo.isAdmin && !order.isDelivered && !order.isFailed && (
                   <ListGroup.Item className='flex items-center justify-center'>
                     {loadingDeliver && <LoadingBox />}
                     <button
@@ -199,6 +244,23 @@ export default function OrderScreen() {
                     >
                       Mark Done
                     </button>
+                  </ListGroup.Item>
+                )}
+                {userInfo.isAdmin && !order.isFailed && !order.isDelivered && (
+                  <ListGroup.Item className='flex items-center justify-center'>
+                    {loadingDeliver && <LoadingBox />}
+                    <button
+                      type='button'
+                      onClick={processFailOrder}
+                      className='bg-red-500 hover:bg-red-600 w-full text-white font-semibold px-4 py-2 rounded-lg transition duration-300'
+                    >
+                      Mark as Failed
+                    </button>
+                  </ListGroup.Item>
+                )}
+                {order.isFailed && (
+                  <ListGroup.Item>
+                    Order has been marked as failed.
                   </ListGroup.Item>
                 )}
                 <ListGroup.Item>

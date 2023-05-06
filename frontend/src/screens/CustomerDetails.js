@@ -114,12 +114,16 @@ export default function CustomerDetails() {
             </div>
             <div class='py-4 px-8 text-center'>
               <p class='text-gray-700'>
-                For your safety and security, we only offer payment on delivery
-                for all purchases on our website.
+                For safety and security, we only allow pickup from the
+                Bookstore.
               </p>
               <p class='text-gray-700 mt-2'>
                 Thank you for your understanding and we look forward to serving
                 you soon.
+              </p>
+              <p class='text-red-500 mt-2'>
+                Note: Order will expire after 2 days and will be mark as failed
+                if not claimed!
               </p>
             </div>
             <button

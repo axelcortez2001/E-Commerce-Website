@@ -23,8 +23,10 @@ const orderSchema = new mongoose.Schema(
       address: { type: String, required: true },
     },
     totalPrice: { type: Number, required: true },
+    expiryDate: { type: Date, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     isDelivered: { type: Boolean, default: false },
+    isFailed: { type: Boolean, default: false },
     deliveredAt: { type: Date },
   },
   {
