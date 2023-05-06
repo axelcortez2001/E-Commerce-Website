@@ -33,6 +33,10 @@ export default function SignupSreen() {
       /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
     return passwordRegex.test(password);
   };
+  const isValidPhoneNumber = (phoneNo) => {
+    const regex = /^(?:\+639|\b09)[0-9]{9}$/; // Regular expression for Philippine mobile numbers
+    return regex.test(phoneNo);
+  }
   const signupHandler = async (e) => {
     e.preventDefault();
     if (password !== confirmPass) {
@@ -41,6 +45,10 @@ export default function SignupSreen() {
     }
     if (!isPasswordValid(password)) {
       toast.error("Password must contain symbol, number and capital letter!");
+      return;
+    }
+    if (!isValidPhoneNumber(phoneNo)) {
+      alert('Please enter a valid Philippine mobile number.');
       return;
     }
     try {

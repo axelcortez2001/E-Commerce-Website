@@ -32,6 +32,20 @@ function reducer(state, action) {
         loadingDeliver: false,
         successDeliver: false,
       };
+    case "SET_STATUS":
+      return {
+        ...state,
+        order: {
+          ...state.order,
+          status: action.payload,
+        },
+      };
+    case "MARKED_AS_FAILED":
+      return {
+        ...state,
+        loading: false,
+        markedAsFailed: true,
+      };
     default:
       return state;
   }
@@ -44,12 +58,14 @@ export default function OrderScreen() {
   const { id: orderId } = params;
   const navigate = useNavigate();
 
-  const [{ loading, error, order, loadingDeliver, successDeliver }, dispatch] =
-    useReducer(reducer, {
-      loading: true,
-      order: {},
-      error: "",
-    });
+  const [
+    { loading, error, order, loadingDeliver, successDeliver, markedAsFailed },
+    dispatch,
+  ] = useReducer(reducer, {
+    loading: true,
+    order: {},
+    error: "",
+  });
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -79,15 +95,20 @@ export default function OrderScreen() {
     const checkExpiry = () => {
       const now = new Date().getTime();
       const expiry = new Date(order.expiryDate).getTime();
-      if (now > expiry) {
+      if (now >= expiry) {
         processFailOrder();
+        dispatch({ type: "MARKED_AS_FAILED" });
       }
     };
-    const expiryInterval = setInterval(checkExpiry, 1000);
+    const expiryInterval = setInterval(() => {
+      if (markedAsFailed !== true) {
+        checkExpiry();
+      }
+    }, 1000);
     return () => clearInterval(expiryInterval);
-  }, [order]);
+  }, [order, markedAsFailed]);
 
-  async function procesdeliver() {
+  async function processdeliver() {
     try {
       dispatch({ type: "DELIVER_REQUEST" });
       const { data } = await axios.put(
@@ -98,6 +119,7 @@ export default function OrderScreen() {
         }
       );
       dispatch({ type: "DELIVER_SUCCESS", payload: data });
+      dispatch({ type: "SET_STATUS", payload: "Delivered" });
       toast.success("Order is delivered");
     } catch (err) {
       toast.error(getError(err));
@@ -114,7 +136,9 @@ export default function OrderScreen() {
         }
       );
       dispatch({ type: "FETCH_SUCCESS", payload: data });
+      dispatch({ type: "SET_STATUS", payload: "Failed" });
       toast.success("Order is marked as failed");
+      console.log(data);
     } catch (err) {
       toast.error(getError(err));
     }
@@ -239,7 +263,7 @@ export default function OrderScreen() {
                     {loadingDeliver && <LoadingBox />}
                     <button
                       type='button'
-                      onClick={procesdeliver}
+                      onClick={processdeliver}
                       className='bg-green-500 hover:bg-green-600 w-full text-white font-semibold px-4 py-2 rounded-lg transition duration-300'
                     >
                       Mark Done

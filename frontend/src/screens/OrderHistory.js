@@ -47,6 +47,21 @@ export default function OrderHistoryScreen() {
     };
     fetchData();
   }, [userInfo]);
+  const getExpirationText = (order) => {
+    const diffMs = new Date(order.expiryDate) - new Date();
+    if (diffMs <= 0) {
+      return "Expired";
+    }
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
+    } else {
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+    }
+  };
   return (
     <div class='bg-gray-100 py-6'>
       <div class='container mx-auto'>
@@ -89,13 +104,13 @@ export default function OrderHistoryScreen() {
                           <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
                             Failed
                           </span>
-                        ) : order.expiryDate >= Date.now ? (
+                        ) : order.expiryDate >= Date.now() ? (
                           <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded'>
                             Expired
                           </span>
                         ) : (
                           <span className='inline-block px-2 py-1 text-xs font-bold leading-none text-white bg-yellow-600 rounded'>
-                            On process!
+                            {getExpirationText(order)}
                           </span>
                         )}
                       </td>
