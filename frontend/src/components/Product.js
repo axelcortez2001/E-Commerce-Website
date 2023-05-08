@@ -44,7 +44,8 @@ function Product(props) {
           </h2>
         </Link>
         <Rating rating={product.rating} numReview={product.numReview} />
-        <p className='text-gray-600'>{product.price}</p>
+        <p className='text-gray-600'>Price: {product.price}</p>
+        <p className='text-gray-600'>Stock: {product.countInStock}</p>
         {product.countInStock === 0 ? (
           <p className='bg-red-500 text-white font-bold text-center py-1 px-2 mt-4 rounded-full'>
             {" "}

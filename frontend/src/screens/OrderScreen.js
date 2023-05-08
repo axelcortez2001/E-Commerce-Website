@@ -101,12 +101,12 @@ export default function OrderScreen() {
       }
     };
     const expiryInterval = setInterval(() => {
-      if (markedAsFailed !== true) {
+      if (order.isFailed !== true) {
         checkExpiry();
       }
     }, 1000);
     return () => clearInterval(expiryInterval);
-  }, [order, markedAsFailed]);
+  }, [order]);
 
   async function processdeliver() {
     try {
@@ -137,6 +137,7 @@ export default function OrderScreen() {
       );
       dispatch({ type: "FETCH_SUCCESS", payload: data });
       dispatch({ type: "SET_STATUS", payload: "Failed" });
+      dispatch({ type: "MARKED_AS_FAILED" });
       toast.success("Order is marked as failed");
       console.log(data);
     } catch (err) {

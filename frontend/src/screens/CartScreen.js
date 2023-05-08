@@ -92,7 +92,7 @@ export default function CartScreen() {
                     </div>
                     <div className='flex items-center ml-auto'>
                       <p className='text-lg font-semibold text-gray-700'>
-                        ${item.price}
+                        {item.price}
                       </p>
                       <button
                         className='ml-4 text-gray-600 hover:text-red-600'

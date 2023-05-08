@@ -151,6 +151,10 @@ function ProductScreen() {
                   <div>{product.price}</div>
                 </div>
                 <div className='mb-4'>
+                  <div className='mb-1 font-semibold'>Stock:</div>
+                  <div>{product.countInStock}</div>
+                </div>
+                <div className='mb-4'>
                   <div className='mb-1 font-semibold'>Status:</div>
                   <div>
                     {product.countInStock > 0 ? (
