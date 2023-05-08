@@ -21,9 +21,16 @@ export default function CustomerDetails() {
       navigate("/signin?redirect=/confirm");
     }
   }, [userInfo, navigate]);
-
+  const isValidPhoneNumber = (phoneNo) => {
+    const regex = /^(?:\+639|\b09)[0-9]{9}$/; // Regular expression for Philippine mobile numbers
+    return regex.test(phoneNo);
+  }
   const confirmOrder = (e) => {
     e.preventDefault();
+    if (!isValidPhoneNumber(phoneNo)) {
+      alert('Please enter a valid Philippine mobile number.');
+      return;
+    }
     ctxDispatch({
       type: "SAVE_CUSTOMER_DETAILS",
       payload: {
