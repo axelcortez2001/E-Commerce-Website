@@ -83,7 +83,9 @@ export default function Dashboard() {
               <Card>
                 <Card.Body>
                   <Card.Title>
-                    {summary.orders && summary.users[0]
+                    {summary.orders &&
+                    summary.users[0] &&
+                    summary.orders[0]?.numOrders
                       ? summary.orders[0].numOrders
                       : 0}
                   </Card.Title>
@@ -95,9 +97,7 @@ export default function Dashboard() {
               <Card>
                 <Card.Body>
                   <Card.Title>
-                    {summary.orders && summary.users[0]
-                      ? summary.orders[0].totalSales.toFixed(2)
-                      : 0}
+                    {summary.orders?.[0]?.totalSales?.toFixed(2) ?? "0"}
                   </Card.Title>
                   <Card.Text> Total Orders Sales</Card.Text>
                 </Card.Body>

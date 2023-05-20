@@ -111,10 +111,18 @@ orderRouter.put(
       order.isFailed = true;
       order.isDelivered = false;
       order.deliveredAt = Date.now();
+      // Calculate the total deducted price
+      const orderItems = order.orderItems;
+      let totalDeductedPrice = 0;
+      for (let i = 0; i < orderItems.length; i++) {
+        const item = orderItems[i];
+        totalDeductedPrice += item.price * item.quantity;
+      }
+      // Deduct the totalprice
+      order.totalPrice -= totalDeductedPrice;
       const updatedOrder = await order.save();
 
       // Update the product countInStock
-      const orderItems = updatedOrder.orderItems;
       for (let i = 0; i < orderItems.length; i++) {
         const item = orderItems[i];
         const product = await Product.findById(item.product);
