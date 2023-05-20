@@ -42,7 +42,14 @@ function App() {
         <header className='bg-gray-800 text-white'>
           <nav className='container mx-auto flex items-center justify-between py-3'>
             <Link to='/' className='text-xl font-bold'>
-              Marian Shop
+              <div className='flex justify-center items-center gap-4'>
+                <img
+                  src='./LOGO.jpg'
+                  alt='logo'
+                  className='h-10 w-10 rounded-full'
+                />
+                Marian Shop
+              </div>
             </Link>
             <Link to='/cart' className='nav-link text-xl font-bold'>
               Cart
