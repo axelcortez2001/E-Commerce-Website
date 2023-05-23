@@ -118,7 +118,7 @@ userRouter.post(
 );
 
 userRouter.put(
-  "/userprofile",
+  "/userprofile/:id",
   isAuth,
   expressAsyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);

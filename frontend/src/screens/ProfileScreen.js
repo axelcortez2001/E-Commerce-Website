@@ -57,7 +57,7 @@ export default function ProfileScreen() {
     }
     try {
       const { data } = await axios.put(
-        "api/users/userprofile",
+        `api/users/userprofile/${userInfo._id}`,
         {
           name,
           email,
